@@ -95,8 +95,8 @@ This script imports and runs all the required functions and from the sub-modules
 # Link to publication
 https://digital.nhs.uk/data-and-information/publications/statistical/breast-screening-programme
 
-# Licence
-The NHS England Breast Screening Programme National Statistics publication codebase is released under the MIT License.
+# License
+The NHS Breast Screening Programme National Statistics publication codebase is released under the MIT License.
 The documentation is © Crown copyright and available under the terms of the [Open Government 3.0 licence](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
 ________________________________________
 You may re-use this document/publication (not including logos) free of charge in any format or medium, under the terms of the Open Government Licence v3.0.

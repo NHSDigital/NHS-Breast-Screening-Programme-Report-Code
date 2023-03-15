@@ -5,7 +5,7 @@ Email: cancer.screening@nhs.net
 To contact us raise an issue via email and we will respond promptly.
 
 ## Clone repository
-To clone respositary, please see our [community of practice page](https://github.com/NHSDigital/rap-community-of-practice/blob/main/development-approach/02_using-git-collaboratively.md).
+To clone repository, please see our [community of practice page](https://nhsdigital.github.io/rap-community-of-practice/training_resources/git/using-git-collaboratively/).
 
 ## Set up environment
 There are two options to set up the python enviroment:
@@ -14,7 +14,7 @@ There are two options to set up the python enviroment:
 
 1.2. Conda using `environment.yml`.
 
-Users would need to delete as appropriate which set they do not need. For details, please see our [virtual environments in the community of practice page](https://github.com/NHSDigital/rap-community-of-practice/blob/main/python/virtual-environments.md).
+Users would need to delete as appropriate which set they do not need. For details, please see our [virtual environments in the community of practice page](https://nhsdigital.github.io/rap-community-of-practice/training_resources/python/virtual-environments/why-use-virtual-environments/).
 
 
 Run the following command in Terminal or VScode to set up the package

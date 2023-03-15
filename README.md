@@ -11,6 +11,7 @@ To clone respositary, please see our [community of practice page](https://github
 There are two options to set up the python enviroment:
 
 1.1 Pip using `requirements.txt`.
+
 1.2. Conda using `environment.yml`.
 
 Users would need to delete as appropriate which set they do not need. For details, please see our [virtual environments in the community of practice page](https://github.com/NHSDigital/rap-community-of-practice/blob/main/python/virtual-environments.md).

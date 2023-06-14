@@ -1,28 +1,10 @@
-from bs_code.utilities.processing_steps import create_output_crosstab
-from bs_code.utilities.processing_steps import create_output_measure
+from bs_code.utilities.processing import create_output_crosstab
+from bs_code.utilities.processing import create_output_measure
 
 """
 This module contains all the user defined inputs for each chart output (data).
-The write arguments in get_kc63_charts and get_kc62_charts are defined as:
 
-name : str
-    Excel worksheet where data is to be written.
-write_type: str
-    Determines the method of writing the output. Valid options for charts are:
-    excel_static: Writes data to Excel where the length of the data is
-    static (write_cell must be populated).
-    excel_variable: Writes data to Excel where the length of the data is
-    variable (write_cell must be populated).
-write_cell: str
-    identifies the cell location in the Excel worksheet where the data
-    will be pasted (top left of data)
-empty_cols: list[str]
-    A list of letters representing any empty (section seperator) excel
-    columns in the worksheet. Empty columns will be inserted into the
-    dataframe in these positions. Default is None.
-contents: list[str]
-    The name of the function that creates the output. If more than one are
-    included they will be appended together.
+See the tables.py file for details of each argument.
 
 """
 
@@ -167,89 +149,9 @@ def get_charts_kc62():
 
 """
     The following functions contain the user defined inputs that determine the
-    dataframe content for each output. The arguments are defined as:
+    dataframe content for each output.
 
-    measure_column : str
-        Single variable name that holds the measure numerator and denominator
-        information (e.g. Col_Def).
-        Only applicable for the create_output_measure function
-    measure : str
-        Name of single measure to be returned. Must be a value from the
-        measure_column or a calculated field from field_definitions.
-    rows : list[str]
-        Variable name(s) that holds the output row content (mutliple variables can
-        be selected).
-    columns : str
-        Variable name that holds the output column content (single variable only)
-        If set to None then a single aggregated count column will be created.
-    part : list[str]
-        Variable name that holds the collection part.
-        Accepts None (no filter applied) or a list of one or more.
-    table_code : list[str]
-        Variable name that holds the collection table code (letter).
-        Accepts None (no filter applied) or a list of one or more.
-    sort_on : list[str]
-        Optional list of columns names to sort on (ascending).
-        Can include columns that will not be displayed in the output.
-        Note that using this option will mean that totals will be removed
-        e.g. for use in org outputs.
-        If row_order is not None then this input should be None.
-    row_order: list[str]
-        Optional list of row content that determines the order data will be
-        presented in the output. Allows for full control of row ordering
-        (can only include row values that exist in the collection).
-        Used where for precise user-defined row ordering.
-        If sort_on is not None then this input should be None.
-    column_order: list[str]
-        list of content from the 'columns' variable that determines what is
-        included and the order they will be presented in the output.
-        This can include derived variables as long as they have been added to
-        field_definitions.py.
-        If set to None then only the grand total for each year in the time
-        series will be outputted.
-    column_rename : dict
-        Optional dictionary for renaming of columns from the data source version
-        to output requirement. Any column set within the 'rows' or
-        'column order' parameters can be renamed.
-    filter_condition : str
-        This is a non-standard, optional dataframe filter as a string
-        needed for some outputs. It may consist of one or more filters of the
-        dataframe variables.
-    visible_condition : str
-        This is an optional condition, as a string.
-        This is used to select rows that will not be visible (use 'not in') or
-        that will be the only rows visible (use 'in') in the output. This will not
-        affect totals / subgroup totals which are added before this condition
-        is applied.
-        e.g. "(Row_Def not in['53-54', '55-59', '60-64', '65-69', '70'])"
-    row_subgroup: dict(dict(str, list))
-        Optional input where a grouped option is reported, requiring a new
-        subgroup based on row content.
-        Contains the target column name, and for each target column another
-        nested dictionary with new subgroup code that will be assigned to the new
-        grouping(s), and the original subgroup values that will form the group.
-        e.g. {"AgeBand": {'53<71': ['53-54', '55-59', '60-64', '65-69', '70']}}
-        Not applicable for the create_output_measure function.
-    column_subgroup: dict(str, list)
-        Optional input where a grouped option is reported, requiring a new
-        subgroup based on column content.
-        Contains the new value(s) that will be assigned to the
-        new grouping(s), and the values (from the 'columns' variable) that
-        will form the group.
-        Not applicable for the create_output_measure function.
-    subgroup: dict(dict(str, list))
-        As per row_subgroup except can be applied to variables that have been
-        set as either the rows or column content.
-        Only applicable for the create_output_measure function.
-    include_row_labels: bool
-        Determines if the row labels will be included in the output.
-    measure_as_rows: bool
-        Indicates if there are measures to be added as rows (can only be applied
-        to the first variable held in the 'rows' input list).
-        Not applicable for the create_output_measure function.
-    ts_years: int
-        Defines the number of time series years required in the output.
-        Default is 1.
+    See the tables.py file for details of each argument.
 
 Returns:
 -------

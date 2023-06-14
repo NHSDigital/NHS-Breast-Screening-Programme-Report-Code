@@ -1,5 +1,5 @@
-from bs_code.utilities.processing_steps import create_output_crosstab
-from bs_code.utilities.processing_steps import create_output_measure
+from bs_code.utilities.processing import create_output_crosstab
+from bs_code.utilities.processing import create_output_measure
 
 """
 This module contains all the user defined inputs for each table.
@@ -14,7 +14,7 @@ write_type: str
     excel_variable: Writes data to Excel where the length of the data is
     variable (write_cell must be populated).
 write_cell: str
-    identifies the cell location in the Excel worksheet where the data
+    Identifies the cell location in the Excel worksheet where the data
     will be pasted (top left of data)
 empty_cols: list[str]
     A list of letters representing any empty (section seperator) excel
@@ -415,7 +415,7 @@ def get_report_tables_kc62():
         Used where for precise user-defined row ordering.
         If sort_on is not None then this input should be None.
     column_order: list[str]
-        list of content from the 'columns' variable that determines what is
+        List of content from the 'columns' variable that determines what is
         included and the order they will be presented in the output.
         This can include derived variables as long as they have been added to
         field_definitions.py.

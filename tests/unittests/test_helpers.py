@@ -5,6 +5,31 @@ from datetime import datetime
 import bs_code.utilities.helpers as helpers
 
 
+def test_create_year_list():
+    """Tests the create_year_list function, which creates a list of years
+    contained within the year field of a dataframe and orders the list by
+    oldest year first.
+    """
+    input_df = pd.DataFrame(
+        {
+            "CollectionYearRange": ["2020-21", "2018-19", "2020-21", "2017-18",
+                                    "2016-17"],
+            "Parent_Org_Code": ["A", "A", "D", "H", "D"],
+            "Row_Def": ["50", "51-52", "60", "50", "51-52"],
+            "Total": [10, 50, 50, 100, 10],
+            }
+        )
+
+    expected = ["2016-17", "2017-18", "2018-19", "2020-21"]
+
+    actual = helpers.create_year_list(
+        input_df,
+        year_field="CollectionYearRange",
+        )
+
+    assert actual == expected
+
+
 def test_replace_col_value():
     """Tests the replace_col_value function, create replaces all values within a
     column with another value
@@ -215,7 +240,7 @@ def test_add_percent_or_rate_no_multiplier():
     pd.testing.assert_frame_equal(actual, expected)
 
 
-def test_add_column_difference():
+def test_add_column_difference_1():
     """
     Tests the add_column_difference function, which adds a column with the
     difference between the last 2 columns in the dataframe.
@@ -241,6 +266,37 @@ def test_add_column_difference():
 
     actual = helpers.add_column_difference(input_df,
                                            new_column_name="New_Col_Name",)
+
+    pd.testing.assert_frame_equal(actual, expected)
+
+
+def test_add_column_difference_2():
+    """
+    Tests the add_column_difference function, which adds a column with the
+    difference between the 2 specified columns in the dataframe.
+    """
+
+    input_df = pd.DataFrame(
+        {
+            "Region": ["A", "B", "C", "D", "E"],
+            "Col1": [100, 800, 100, 0.0, 5],
+            "Col2": [100, 0, 10, np.nan, 3],
+            "Col3": [100, 50, 5, 5, np.nan]
+            }
+        )
+
+    expected = pd.DataFrame(
+        {
+            "Region": ["A", "B", "C", "D", "E"],
+            "Col1": [100, 800, 100, 0.0, 5],
+            "Col2": [100, 0, 10, np.nan, 3],
+            "Col3": [100, 50, 5, 5, np.nan],
+            "New_Col_Name": [0, -750, -95, 5, np.nan]}
+        )
+
+    actual = helpers.add_column_difference(input_df,
+                                           new_column_name="New_Col_Name",
+                                           col1="Col1", col2="Col3")
 
     pd.testing.assert_frame_equal(actual, expected)
 
@@ -491,3 +547,116 @@ def test_filter_for_year():
 
     pd.testing.assert_frame_equal(actual.reset_index(drop=True),
                                   expected.reset_index(drop=True))
+
+
+def test_get_start_year_range():
+    """Tests the get_start_year_range function, which create list of financial
+    start year strings, given an end year and a number of years to go back
+    """
+    input_value = "2021"
+
+    expected = ["01APR2019", "01APR2020", "01APR2021"]
+
+    actual = helpers.get_start_year_range(input_value, 3)
+
+    assert actual == expected
+
+
+def test_start_date_to_year_series():
+    """Tests the start_date_to_year_series function, which takes a date field in
+    the format DDMMYYYY (e.g. '01APR2021') and adds a year range column to the
+    dataframe (e.g '2021-22')
+    """
+    input_df = pd.DataFrame(
+        {
+            "Financial_Yr": ["01APR2001", "01APR2007", "01APR2009", "01APR2013",
+                             "01APR2015", "01APR2018"],
+            "Total": [10, 10, 10, 20, 30, 10]
+        }
+    )
+    expected = pd.DataFrame(
+        {
+            "Financial_Yr": ["01APR2001", "01APR2007", "01APR2009", "01APR2013",
+                             "01APR2015", "01APR2018"],
+            "Total": [10, 10, 10, 20, 30, 10],
+            "Year_Range": ["2001-03", "2007-09", "2009-11", "2013-15", "2015-17",
+                           "2018-20"]
+            }
+        )
+    actual = helpers.start_date_to_year_series(
+        input_df,
+        old_date_field="Financial_Yr",
+        new_date_field="Year_Range",
+        yr_range=2
+       )
+
+    pd.testing.assert_frame_equal(actual, expected)
+
+
+def test_add_average_of_columns():
+    """Tests the add_average_of_columns function, which appends an average column
+    derived from a subset of columns, created from a specified end column and
+    a number of columns back from this column
+    """
+
+    input_df = pd.DataFrame(
+        {
+            "2018-19": [50.0, 100.0, 80.0, 250.0, 100.0],
+            "2019-20": [75.0, 50.0, 60.0, 300.0, 80.0],
+            "2020-21": [10.0, 20.0, 40.0, 100.0, 200.0],
+            "2021-22": [150.0, 10.0, 50.0, 30.0, 100.0]
+        }
+    )
+
+    expected = pd.DataFrame(
+        {
+            "2018-19": [50.0, 100.0, 80.0, 250.0, 100.0],
+            "2019-20": [75.0, 50.0, 60.0, 300.0, 80.0],
+            "2020-21": [10.0, 20.0, 40.0, 100.0, 200.0],
+            "2021-22": [150.0, 10.0, 50.0, 30.0, 100.0],
+            "Avg_columns": [42.5, 35, 50, 200, 140]
+        }
+    )
+
+    actual = helpers.add_average_of_columns(
+        input_df,
+        end_column="2020-21",
+        number_cols=2
+    )
+
+    pd.testing.assert_frame_equal(actual, expected)
+
+
+def test_add_percent_change():
+    """Tests the add_percent_change function, which appends a percentage change
+    column derived from two specified columns
+    """
+
+    input_df = pd.DataFrame(
+        {
+            "2018-19": [50.0, 100.0, 80.0, 250.0, 100.0],
+            "2019-20": [75.0, 50.0, 60.0, 300.0, 80.0],
+            "2020-21": [100.0, 20.0, 40.0, 100.0, 200.0],
+            "2021-22": [150.0, 10.0, 50.0, 70.0, 100.0]
+            }
+        )
+
+    expected = pd.DataFrame(
+        {
+            "2018-19": [50.0, 100.0, 80.0, 250.0, 100.0],
+            "2019-20": [75.0, 50.0, 60.0, 300.0, 80.0],
+            "2020-21": [100.0, 20.0, 40.0, 100.0, 200.0],
+            "2021-22": [150.0, 10.0, 50.0, 70.0, 100.0],
+            "YoY_Percent_Change": [50.0, -50.0, 25.0, -30.0, -50.0]
+            }
+        )
+
+    actual = helpers.add_percent_change(
+        input_df,
+        new_column_name="YoY_Percent_Change",
+        to_year="2021-22",
+        from_year="2020-21",
+        multiplier=100
+        )
+
+    pd.testing.assert_frame_equal(actual, expected)

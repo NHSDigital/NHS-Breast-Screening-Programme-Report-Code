@@ -1,39 +1,18 @@
-from bs_code.utilities.processing_steps import create_output_crosstab
+from bs_code.utilities.processing import create_output_crosstab
 
 
 """
-This module contains all the user defined inputs for each dashboard data output.
-The write arguments in get_dashboards_kc63 and get_dashboards_kc62 are defined as:
+This module contains all the user defined inputs for each dashboard output (data).
 
-name : str
-    Name of the worksheet to be written to (for Excel) or to be assigned
-    as the name of the output file (for csv's).
-write_type: str
-    Determines the method of writing the output. Valid options are:
-    excel_static: Writes data to Excel where the length of the data is
-    static (write_cell must be populated).
-    excel_variable: Writes data to Excel where the length of the data is
-    variable (write_cell must be populated).
-    csv: Writes data to a csv file. Will be named as per 'name' input.
-write_cell: str
-    Identifies the cell location in the Excel worksheet where the data
-    will be pasted (top left of data). Not required for write_type = csv.
-empty_cols: list[str]
-    A list of letters representing any empty (section seperator) excel
-    measure_column in the worksheet. Empty column will be inserted into the
-    dataframe in these positions. Not required for write_type = csv.
-contents: list[str]
-    The name of the function that creates the output. If more than one are
-    included they will be appended together.
+See the tables.py file for details of each argument.
 
 """
 
 
 def get_dashboards_kc63():
     """
-    Establishes each of the output csv files, and associated processes
-    required for each csv that uses KC63 data.
-    Add or remove any from the list as required.
+    Establishes the functions (contents) required for each dashboard output that
+    uses KC63 data, and the arguments needed for the write process.
 
     Parameters:
         None
@@ -59,9 +38,8 @@ def get_dashboards_kc63():
 
 def get_dashboards_kc62():
     """
-    Establishes each of the output csv files, and associated processes
-    required for each csv that uses KC62 data.
-    Add or remove any from the list as required.
+    Establishes the functions (contents) required for each dashboard output that
+    uses KC62 data, and the arguments needed for the write process.
 
     Parameters:
         None
@@ -95,77 +73,13 @@ def get_dashboards_kc62():
 
 """
     The following functions contain the user defined inputs that determine the
-    dataframe content for each output. The arguments are defined as:
+    dataframe content for each output.
 
-    breakdowns : list[str]
-        Variable name(s) that holds the output breakdown content (mutliple
-        variables can be selected).
-    measure_column : str
-        Variable name that holds the measure content (single variable only)
-        If set to None then a single aggregated count column will be created.
-    part : list[str]
-        Variable name that holds the collection part.
-        Accepts None (no filter applied) or a list of one or more.
-    table_code : list[str]
-        Variable name that holds the collection table code (letter).
-        Accepts None (no filter applied) or a list of one or more.
-    sort_on : list[str]
-        Optional list of column names to sort on (ascending).
-        Can include columns that will not be displayed in the output.
-        Note that using this option will mean that totals will be removed
-        e.g. for use in org outputs.
-        If breakdown_order is not None then this input should be None.
-    breakdown_order: list[str]
-        Optional list of row content that determines the order data will be
-        presented in the output. Allows for full control of row ordering
-        (can only include row values that exist in the breakdown column(s)).
-        Used for precise user-defined row ordering.
-        If sort_on is not None then this input should be None.
-    measure_order: list[str]
-        list of measure names from measure_column that determines what is
-        included and the order they will be presented in the output.
-        This can include derived variables as long as they have been added to
-        field_definitions.py.
-        If set to None then only the grand total for each year in the time
-        series will be outputted.
-    column_rename : dict
-        Optional dictionary for renaming of columns from the data source version
-        to output requirement. Any column set within the 'breakdowns' or
-        'column order' parameters can be renamed.
-    filter_condition : str
-        This is a non-standard, optional dataframe filter as a string
-        needed for some charts. It may consist of one or more filters of the
-        dataframe variables.
-    visible_condition : str
-        This is an optional condition, as a string.
-        This is used to select breakdowns that will not be visible (use 'not in') or
-        that will be the only breakdowns visible (use 'in') in the output. This will not
-        affect totals / subgroup totals which are added before this condition
-        is applied.
-        e.g. "(Row_Def not in['53-54', '55-59', '60-64', '65-69', '70'])"
-    breakdown_subgroup: dict(dict(str, list))
-        Optional input where a grouped option is reported, requiring a new
-        subgroup based on breakdown content.
-        Contains the breakdown column name, and for each column name another
-        nested dictionary with new subgroup code that will be assigned to the new
-        grouping(s), and the original subgroup values that will form the group.
-        e.g. {"AgeBand": {'53<71': ['53-54', '55-59', '60-64', '65-69', '70']}}
-    measure_subgroup: dict(str, list)
-        Optional input where a grouped option is reported, requiring a new
-        subgroup based on measure content.
-        Contains the new value(s) that will be assigned to the
-        new grouping(s), and the values (from the 'measure_column' variable) that
-        will form the group.
-    measure_as_rows: bool
-        Set to False for dashboard outputs where the measures are always set as
-        column headers.
-    ts_years: int
-        Defines the number of years required in the output.
-        Default is 1 if not included.
+    See the tables.py file for details of each argument.
 
 Returns:
 -------
-    Each function returns a dataframe with the output for the dashboard.
+    Each function returns a dataframe with the output.
 
 """
 

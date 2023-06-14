@@ -12,7 +12,12 @@ CHART_DIR = PUB_DIR / "Charts"
 CSV_DIR = PUB_DIR / "CSVs"
 REPORT_TAB_DIR = PUB_DIR / "ReportTables"
 DASHBOARD_DIR = OUTPUT_DIR / "Dashboard"
+VALIDATION_DIR = OUTPUT_DIR / "Validations"
 LOG_DIR = OUTPUT_DIR / "Logs"
+
+# Set the locations/filenames of the validation files
+VALIDATIONS_OUTPUT_KC63 = VALIDATION_DIR / "breast_screening_kc63_validations.xlsx"
+VALIDATIONS_OUTPUT_KC62 = VALIDATION_DIR / "breast_screening_kc62_validations.xlsx"
 
 # Set the locations/filenames of the master files
 TABLE_TEMPLATE = MASTER_DIR / "breast_screening_datatables_master.xlsx"
@@ -29,12 +34,15 @@ LA_UPDATES = pathlib.Path(r"ReferenceDataDirectory\CANS_LA_REGION.csv")
 SERVER = "SERVER"
 DATABASE = "DATABASE"
 TABLE = "TABLE"
+TABLE_KC63 = "TABLE2"
 
 # Set the current reporting year (yyyy-yy)
 YEAR = "2021-22"
 
 # Sets which outputs should be run as part of the create_publication process
 # (True or False)
+VALIDATIONS_KC63 = False  # Validations derived from KC63 data
+VALIDATIONS_KC62 = False  # Validations derived from KC62 data
 TABLES_KC63 = False  # Tables derived from KC63 data
 CHARTS_KC63 = False  # Charts derived from KC63 data
 CSVS_KC63 = False  # Csvs derived from KC623data
@@ -48,11 +56,11 @@ RUN_PUBLICATION_OUTPUTS = False
 # Worksheets to be removed from final publication file
 TABLES_REMOVE = ["Cross Checks", "Org Total Checks"]
 
+
 # Sets the number of years of KC63 data to be imported (number >=1)
 TS_YEARS_KC63 = 13
 # Sets the number of years of KC62 data to be imported (number >=1)
 TS_YEARS_KC62 = 13
-
 # Set the symbol to be used for not applicable (null) values in the outputs
 NOT_APPLICABLE = "z"
 # Set the symbol/text to be used for not included values in the csv outputs
@@ -60,19 +68,19 @@ CSV_NOT_INC = "not included"
 # Set the symbol/text to be used for low numerator warnings
 LOW_NUMERATOR = "!"
 
-# Dictionary contaiining the region codes that need updating for time series data
-REGION_UPDATE = {"Q30": "R1",
-                 "Q31": "R2",
-                 "Q32": "R3",
-                 "Q33": "R4",
-                 "Q34": "R5",
-                 "Q35": "R6",
-                 "Q36": "R7",
-                 "Q37": "R8",
-                 "Q38": "R8",
-                 "Q39": "R10",
-                 "R9": "R8"
-                 }
+# Set the time series validation conditions
+YOY_TO_YEAR = "2021-22"
+YOY_FROM_YEAR = "2020-21"
+ROLLING_AVG_YEARS =    # Interger value representing number of years
+YOY_BREACH_KC63 =    # Integer value indicating % change to flag
+YOY_BREACH_KC62 =    # Integer value indicating % change to flag
+AVG_BREACH_KC63 =    # Integer value indicating % change to flag
+AVG_BREACH_KC62 =    # Integer value indicating % change to flag
+YOY_COV_BREACH_KC63 =    # Integer value representing % point change to flag
+AVG_COV_BREACH_KC63 =    # Integer value representing % point change to flag
+YOY_RATE_BREACH_KC62 =    # Integer value indicating % change to flag
+AVG_RATE_BREACH_KC62 =    # Integer value indicating % change to flag
+
 
 # Small LAs to combine with larger LAs for KC63
 # Reassigns City of London LA E09000001 to Hackney LA E09000012
@@ -135,6 +143,20 @@ REGION_ORDER_KC62 = {"R1": 1,
                      "R8": 8,
                      "R10": 9,
                      }
+
+# Dictionary that defines the region order that KC63 LA data will be
+# presented in the tables
+REGION_ORDER_KC63 = {"A": 1,
+                     "B": 3,
+                     "D": 2,
+                     "E": 4,
+                     "F": 5,
+                     "G": 6,
+                     "H": 7,
+                     "J": 8,
+                     "K": 9,
+                     }
+
 
 # Dictionary containing the BSU flag name and the BSU's it applies to for the
 # internal dashboard output. Additional BSU flags can be added if required.

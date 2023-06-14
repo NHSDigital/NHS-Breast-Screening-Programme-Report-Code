@@ -1,4 +1,4 @@
-from bs_code.utilities.processing_steps import create_output_csv_tidy
+from bs_code.utilities.processing import create_output_csv_tidy
 
 
 """
@@ -98,7 +98,7 @@ def get_csvs_kc62():
         Screening collection source for the output (KC62 or KC63).
     breakdown : list[str]
         Variable name(s) that define the breakdowns to be included in the
-        output (mutliple variables can be selected).
+        output (multiple variables can be selected).
         Note that the year field is included in the output by default
         so does not need including in this list.
     org_level : str
@@ -116,7 +116,7 @@ def get_csvs_kc62():
         Optional list of columns names to sort on (ascending).
         Can include columns that will not be displayed in the output.
     measure_order: list[str]
-        list of measure names from measure_column that determines what is
+        List of measure names from measure_column that determines what is
         included and the order they will be presented in the output.
         This can include derived variables as long as they have been added to
         field_definitions.py.

@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
-import bs_code.utilities.processing_steps as processing
+from bs_code.utilities import processing
 
 
 def test_filter_dataframe():
-    """Tests the filter_dataframe function, which filters a dataframe by
+    """Tests the filter_dataframe function, which filters at dataframe by
     mandatory filters (e.g part and collection), the number of years data to be
     used and any additional optional filters (e.g by age).
     """
@@ -39,68 +39,6 @@ def test_filter_dataframe():
 
     pd.testing.assert_frame_equal(actual.reset_index(drop=True),
                                   expected.reset_index(drop=True))
-
-
-def test_create_year_list():
-    """Tests the create_year_list function, which creates a list of years
-    contained within the year field of a dataframe and orders the list by
-    oldest year first.
-    """
-    input_df = pd.DataFrame(
-        {
-            "CollectionYearRange": ["2020-21", "2018-19", "2020-21", "2017-18",
-                                    "2016-17"],
-            "Parent_Org_Code": ["A", "A", "D", "H", "D"],
-            "Row_Def": ["50", "51-52", "60", "50", "51-52"],
-            "Total": [10, 50, 50, 100, 10],
-            }
-        )
-
-    expected = ["2016-17", "2017-18", "2018-19", "2020-21"]
-
-    actual = processing.create_year_list(
-        input_df,
-        year_field="CollectionYearRange",
-        )
-
-    assert actual == expected
-
-
-def test_combine_small_las():
-    """
-    Tests the combine_small_las function, which combines small LAs to
-    neighbouring LAs for non-disclosure purposes (currently City of London and
-    Isles of Scilly)
-    """
-    ORG_UPDATE = {"Org_ONSCode": ["E09000001", "E06000053"],
-                  "Org_ONSCode_New": ["E09000012", "E06000052"],
-                  "Org_Name": ["City of London", "Isles of Scilly"],
-                  "Org_Name_New": ["Hackney", "Cornwall"]}
-
-    input_df = pd.DataFrame(
-        {
-            "Org_ONSCode": ["E09000001", "E09000001", "E09000012", "E06000053",
-                            "E06000052", "E06000047", "E10000006"],
-            "Org_Name": ["CITY OF LONDON", "City of London", "Hackney",
-                         "Isles of Scilly", "Cornwall", "County Durham",
-                         "Cumbria"]
-            }
-        )
-
-    expected = pd.DataFrame(
-        {
-            "Org_ONSCode": ["E09000012", "E09000012", "E09000012",
-                            "E06000052", "E06000052", "E06000047", "E10000006"],
-            "Org_Name": ["Hackney", "Hackney", "Hackney", "Cornwall",
-                         "Cornwall", "County Durham", "Cumbria"]
-            }
-        )
-
-    actual = processing.combine_small_las(
-        input_df, ORG_UPDATE
-        )
-
-    pd.testing.assert_frame_equal(actual, expected)
 
 
 def test_sort_for_output_defined():
@@ -253,71 +191,6 @@ def test_transpose_for_dashboard():
         input_df,
         name="Dashboard_Uptake",
     )
-
-    pd.testing.assert_frame_equal(actual.reset_index(drop=True),
-                                  expected.reset_index(drop=True))
-
-
-def test_update_la_regions():
-    """
-    Tests the update la regions function
-    """
-
-    input_df = pd.DataFrame(
-        {
-            "CollectionYearRange": ["2011-12", "2012-13", "2013-14", "2015-16",
-                                    "2011-12", "2012-13", "2013-14", "2015-16"],
-            "Org_ONSCode": ["E06000001", "E06000001", "E06000001", "E06000001",
-                            "E06000005", "E06000005", "E06000005", "E06000005"],
-            "Parent_Org_Name": ["London", "London", "London", "London",
-                                "North West", "North West", "North West", "North West"],
-            "Parent_Org_Code": ["A", "A", "A", "A",
-                                "C", "C", "C", "C"],
-            "Parent_OrgONSCode": ["E12000001", "E12000001", "E12000001", "E12000001",
-                                  "E12000009", "E12000009", "E12000009", "E12000009"]
-            }
-        )
-
-    df_update_info = pd.DataFrame(
-        {
-            "LA_ONS_Code": ["E06000001"],
-            "REP_Parent_Name": ["South West"],
-            "REP_Parent_Code": ["B"],
-            "REP_Parent_ONS_Code": ["E12000002"],
-            "BUSINESS_START_DATE": ["01-04-2013"],
-            "BUSINESS_END_DATE": ["NaT"]
-            }
-        )
-
-    # Change strings to datetime objects
-    df_update_info["BUSINESS_START_DATE"] = pd.to_datetime(df_update_info
-                                                           ["BUSINESS_START_DATE"],
-                                                           dayfirst=True)
-    df_update_info["BUSINESS_END_DATE"] = pd.to_datetime(df_update_info
-                                                         ["BUSINESS_END_DATE"],
-                                                         dayfirst=True)
-
-    expected = pd.DataFrame(
-        {
-            "CollectionYearRange": ["2011-12", "2012-13", "2013-14", "2015-16",
-                                    "2011-12", "2012-13", "2013-14", "2015-16"],
-            "Org_ONSCode": ["E06000001", "E06000001", "E06000001", "E06000001",
-                            "E06000005", "E06000005", "E06000005", "E06000005"],
-            "Parent_Org_Name": ["London", "London", "South West", "South West",
-                                "North West", "North West", "North West", "North West"],
-            "Parent_Org_Code": ["A", "A", "B", "B",
-                                "C", "C", "C", "C"],
-            "Parent_OrgONSCode": ["E12000001", "E12000001", "E12000002", "E12000002",
-                                  "E12000009", "E12000009", "E12000009", "E12000009"]
-            }
-        )
-
-    year_range = ["2011-12", "2012-13", "2013-14", "2015-16"]
-    actual = processing.update_la_regions(
-        input_df,
-        df_update_info,
-        year_range
-        )
 
     pd.testing.assert_frame_equal(actual.reset_index(drop=True),
                                   expected.reset_index(drop=True))

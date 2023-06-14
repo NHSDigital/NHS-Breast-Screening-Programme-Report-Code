@@ -9,6 +9,6 @@ setup(
     description='To create publication ...',
     author='NHS_Digital',
     license='',
-    setup_requires=['pytest-runner','flake8'],
+    setup_requires=['pytest-runner', 'flake8'],
     tests_require=['pytest'],
 )

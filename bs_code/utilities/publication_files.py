@@ -16,9 +16,9 @@ def define_labels(tag, year):
     Parameters
     ----------
     tag : str
-        tag that is used to lookup the required label
+        Tag that is used to lookup the required label
     year : str
-        reporting year used to populate elements of the label
+        Reporting year used to populate elements of the label
     Returns
     -------
     label: str
@@ -84,7 +84,7 @@ def add_labels(filename):
     Parameters
     ----------
     filename : path
-        filepath of the Excel file that contains the cells to be updated.
+        Filepath of the Excel file that contains the cells to be updated.
     Returns
     -------
         None
@@ -124,7 +124,7 @@ def save_tables(source_file):
     Parameters
     ----------
     source_file : path
-        filepath of the Excel file that contains the tables to be saved.
+        Filepath of the Excel file that contains the tables to be saved.
     Returns
     -------
         None
@@ -203,7 +203,7 @@ def save_charts_as_image(source_file,
         Default is png.
     size_factor: int
         The factor by which the image length and width will be multiplied by.
-        If set to 1 then no resezing will take place.
+        If set to 1 then no resizing will take place.
     Returns
     -------
         None
@@ -219,7 +219,7 @@ def save_charts_as_image(source_file,
     # Create a list of all the worksheets in the file
     sheet_names = [sheet.Name for sheet in wb.Sheets]
 
-    # For each worksheet, write the chart as a the specified type, named as
+    # For each worksheet, write the chart as the specified type, named as
     # per the worksheet.
     for sheet in sheet_names:
         sht = wb.Worksheets[sheet]

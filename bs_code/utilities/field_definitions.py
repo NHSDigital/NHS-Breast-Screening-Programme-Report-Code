@@ -1,6 +1,7 @@
 import bs_code.parameters as param
 import bs_code.utilities.helpers as helpers
 import pandas as pd
+import numpy as np
 import logging
 
 
@@ -16,7 +17,7 @@ def add_measures_counts(df, collection,
     ----------
     df : pandas.DataFrame
     collection: str
-        breast screening collection being processed
+        Breast Screening collection being processed
     counts_column_content: str
         Name of column which contains the aggregated counts
     measure_column_content: str
@@ -25,7 +26,7 @@ def add_measures_counts(df, collection,
     Returns
     -------
     pandas.DataFrame
-        Copy df with required counts added to the measure column.
+        df with required counts added to the measure column.
     """
     logging.info("Adding calculated counts to the dataframe")
 
@@ -74,14 +75,15 @@ def check_measure_as_rows(df, column_content,
     ----------
     df : pandas.DataFrame
     column_content: list[str]
-        list of column values to be checked which will determine which measures
+        List of column values to be checked which will determine which measures
         will be added to the column content.
+        Only used if measure_as_rows is False.
     measure_as_rows: bool
         Indicates if the measures are currently stored in rows (within the first
         variable held in the rows input list).
         Default is False
     row_content: list[str]
-        list of column values to be checked which will determine which measure
+        List of column values to be checked which will determine which measure
         will be added to the row content.
         Only used if measure_as_rows is True.
     rows : list[str]
@@ -92,7 +94,7 @@ def check_measure_as_rows(df, column_content,
     Returns
     -------
     pandas.DataFrame
-        Copy df with required measures added
+        df with required measures added
     """
     # If the measure as rows flag is set to True
     # then the datframe will be temporarily transposed so that the measures
@@ -111,9 +113,9 @@ def check_measure_as_rows(df, column_content,
         # Then transpose the measures back into rows
         df = df.transpose()
         df.reset_index(inplace=True)
-
-    # Then also process any measures that are in columns
-    df = add_measures(df, column_content)
+    else:
+        # Else process the measures in columns
+        df = add_measures(df, column_content)
 
     return df
 
@@ -127,13 +129,13 @@ def add_measures(df, columns):
     ----------
     df : pandas.DataFrame
     columns: list[str]
-        list of column values to be checked which will determine which measures
+        List of column values to be checked which will determine which measures
         will be added to the column content.
 
     Returns
     -------
     pandas.DataFrame
-        Copy df with required measures added
+        df with required measures added
     """
 
     # This will add a new percentage of (column) total field to a dataframe
@@ -228,7 +230,7 @@ def coverage(df):
     Returns
     -------
     pandas.DataFrame
-        Copy df with Coverage column added
+        df with 'Coverage' column added
 
     """
     new_column_name = "Coverage"
@@ -255,7 +257,7 @@ def percent_never_screened(df):
     Returns
     -------
     pandas.DataFrame
-        Copy df with percent never screened column added
+        df with percent never screened column added
 
     """
     new_column_name = "Percent_never_screened"
@@ -282,7 +284,7 @@ def women_eligible(df):
     Returns
     -------
     pandas.DataFrame
-        Copy df with women eligible column added
+        df with women eligible column added
 
     """
     df["Women_eligible"] = df["Women_resident"] - df["Women_ineligible"]
@@ -303,7 +305,7 @@ def women_never_screened(df):
     Returns
     -------
     pandas.DataFrame
-        Copy df with women never screened column added
+        df with women never screened column added
 
     """
     df["Women_never_screened"] = (df["Women_selected_no_screen"]
@@ -325,7 +327,7 @@ def uptake(df):
     Returns
     -------
     pandas.DataFrame
-        Copy df with Uptake column added
+        df with 'Uptake' column added
 
     """
     new_column_name = "Uptake"
@@ -353,7 +355,7 @@ def percent_assessment(df):
     Returns
     -------
     pandas.DataFrame
-        percent referred for assessment added
+        df with percent referred for assessment added
 
     """
     new_column_name = "Percent_assessment"
@@ -384,7 +386,7 @@ def percent_str(df):
     Returns
     -------
     pandas.DataFrame
-        percent short term recall assessment percentage added
+        df with short term recall assessment percentage added
 
     """
     new_column_name = "Percent_STR"
@@ -403,7 +405,7 @@ def percent_str(df):
 
 def invasive_15mmplus(df):
     """
-    Adds a invasive (>=15mm) sub-group total to the dataframe
+    Adds an invasive (>=15mm) sub-group total to the dataframe
 
     Parameters
     ----------
@@ -414,7 +416,7 @@ def invasive_15mmplus(df):
     Returns
     -------
     pandas.DataFrame
-        Copy df with Invasive cancer 15mmplus column added
+        df with invasive cancer 15mmplus column added
 
     """
     df["Invasive_15mmplus"] = (df["Invasive_15mmto20mm"]
@@ -437,7 +439,7 @@ def small_invasive(df):
     Returns
     -------
     pandas.DataFrame
-        Copy df with Small invasive column added
+        df with small invasive column added
 
     """
     df["Small_invasive"] = (df["Invasive_lessthan10mm"]
@@ -459,7 +461,7 @@ def non_or_micro_invasive(df):
     Returns
     -------
     pandas.DataFrame
-        Copy df with Non or micro invasive cancer column added
+        df with non or micro invasive cancer column added
 
     """
     df["Non_or_micro_invasive"] = (df["Cancer_non_microinvasive"]
@@ -482,7 +484,7 @@ def rate_with_cancer(df):
     Returns
     -------
     pandas.DataFrame
-        number with cancer per 1000 people added
+        df with number with cancer per 1000 people column added
 
     """
     new_column_name = "Rate_with_cancer"
@@ -513,7 +515,8 @@ def rate_non_or_micro_invasive(df):
     Returns
     -------
     pandas.DataFrame
-        number with non or micro invasive cancer per 1000 people screened
+        df with number with non or micro invasive cancer per 1000 people screened
+        column added
 
     """
     new_column_name = "Rate_non_or_micro_invasive"
@@ -544,7 +547,7 @@ def rate_invasive_15mmplus(df):
     Returns
     -------
     pandas.DataFrame
-        number with invasive cancer per 1000 people screened
+        df with number with invasive cancer per 1000 people screened column added
 
     """
     new_column_name = "Rate_invasive_15mmplus"
@@ -575,7 +578,7 @@ def rate_small_invasive(df):
     Returns
     -------
     pandas.DataFrame
-        with small invasive cancer per 1000 people screened added
+        df with small invasive cancer per 1000 people screened column added
 
     """
     new_column_name = "Rate_small_invasive"
@@ -606,7 +609,7 @@ def percent_small_invasive(df):
     Returns
     -------
     pandas.DataFrame
-        with percent small invasive added
+        df with percent small invasive column added
 
     """
     new_column_name = "Percent_small_invasive"
@@ -637,7 +640,7 @@ def percent_invasive_15mmplus(df):
     Returns
     -------
     pandas.DataFrame
-        with percent invasive 15mm plus added
+        df with percent invasive 15mm plus column added
 
     """
     new_column_name = "Percent_invasive_15mmplus"
@@ -665,7 +668,7 @@ def percent_invasive_unknown(df):
     Returns
     -------
     pandas.DataFrame
-        with percent invasive 15mm plus added
+        df with percent invasive 15mm plus column added
 
     """
     new_column_name = "Percent_invasive_unknown"
@@ -691,7 +694,7 @@ def benign_biopsy(df):
     Returns
     -------
     pandas.DataFrame
-        with total benign biopsy added
+        df with total benign biopsy column added
 
     """
     df["Benign_biopsy"] = df["Open_biop_RR"] + df["Open_biop_STR"]
@@ -713,7 +716,7 @@ def rate_benign_biopsy(df):
     Returns
     -------
     pandas.DataFrame
-        with benign biopsy rate per 1000 screened added
+        df with benign biopsy rate per 1000 screened column added
 
     """
     new_column_name = "Rate_benign_biopsy"
@@ -742,7 +745,7 @@ def cancers_diagnosed(df):
     Returns
     -------
     pandas.DataFrame
-        with Cancers diagnosed
+        df with cancers diagnosed column added
 
     """
     df["Cancers_diagnosed"] = df["Cyt_bio_cancer"] + df["Open_biop_cancer"]
@@ -764,7 +767,7 @@ def rate_non_op_diagnosis(df):
     Returns
     -------
     pandas.DataFrame
-        with non-operative diagnosis rate (percent) added
+        df with non-operative diagnosis rate (percent) column added
 
     """
     new_column_name = "Rate_non_op_diagnosis"
@@ -862,7 +865,7 @@ def sdr(df):
     Returns
     -------
     pandas.DataFrame
-        With SDR column added
+        df with SDR column added
     """
     new_column_name = "SDR"
     numerator = "Invasive_total"
@@ -892,7 +895,7 @@ def percent_cyt_biop_referrals(df):
     Returns
     -------
     pandas.DataFrame
-        With Percent_cyt_biop_referrals added
+        df with Percent_cyt_biop_referrals column added
     """
     new_column_name = "Percent_cyt_biop_referrals"
     numerator = "Referral_cyt_bio"
@@ -918,7 +921,7 @@ def percent_open_biop_referrals(df):
     Returns
     -------
     pandas.DataFrame
-        With Percent_open_biop_referrals column added
+        df with Percent_open_biop_referrals column added
     """
     new_column_name = "Percent_open_biop_referrals"
     numerator = "Open_biop_total"
@@ -944,7 +947,7 @@ def percent_str_referrals(df):
     Returns
     -------
     pandas.DataFrame
-        With Percent_str_outcomes column added
+        df With Percent_str_outcomes column added
     """
     new_column_name = "Percent_STR_referrals"
     numerator = "Final_STR"
@@ -971,7 +974,7 @@ def percent_cancer_non_or_micro_invasive(df):
     Returns
     -------
     pandas.DataFrame
-        With Percent_cancer_non_or_micro_invasive column added
+        df with Percent_cancer_non_or_micro_invasive column added
     """
     new_column_name = "Percent_cancer_non_or_micro_invasive"
     numerator = "Non_or_micro_invasive"
@@ -998,7 +1001,7 @@ def percent_cancer_invasive_total(df):
     Returns
     -------
     pandas.DataFrame
-        With Percent_cancer_invasive_total column added
+        df with Percent_cancer_invasive_total column added
     """
     new_column_name = "Percent_cancer_invasive_total"
     numerator = "Invasive_total"
@@ -1025,7 +1028,7 @@ def percent_cancer_small_invasive(df):
     Returns
     -------
     pandas.DataFrame
-        With Percent_cancer_small_invasive column added
+        df with Percent_cancer_small_invasive column added
     """
     new_column_name = "Percent_cancer_small_invasive"
     numerator = "Small_invasive"
@@ -1052,7 +1055,7 @@ def percent_cancer_invasive_15mmplus(df):
     Returns
     -------
     pandas.DataFrame
-        With Percent_cancer_invasive_15mmplus column added
+        df with Percent_cancer_invasive_15mmplus column added
     """
     new_column_name = "Percent_cancer_invasive_15mmplus"
     numerator = "Invasive_15mmplus"
@@ -1079,7 +1082,7 @@ def percent_hr_referred_assess(df):
     Returns
     -------
     pandas.DataFrame
-        With Percent_hr_referred_assess column added
+        df with Percent_hr_referred_assess column added
     """
     new_column_name = "Percent_hr_referred_assess"
     numerator = "HR_Total_referred"
@@ -1106,7 +1109,7 @@ def rate_hr_cancer_detected(df):
     Returns
     -------
     pandas.DataFrame
-        With Rate_hr_cancer_detected column added
+        df with Rate_hr_cancer_detected column added
     """
     new_column_name = "Rate_hr_cancer_detected"
     numerator = "HR_Total_women_with_cancer"
@@ -1133,7 +1136,7 @@ def rate_hr_invasive_cancers(df):
     Returns
     -------
     pandas.DataFrame
-        With Rate_hr_invasive_cancers column added
+       df with Rate_hr_invasive_cancers column added
     """
     new_column_name = "Rate_hr_invasive_cancers"
     numerator = "HR_Total_invasive_cancers"
@@ -1142,5 +1145,120 @@ def rate_hr_invasive_cancers(df):
 
     helpers.add_percent_or_rate(df, new_column_name, numerator,
                                 denominator, multiplier)
+
+    return df
+
+
+def add_validation_columns(df, validations, measures):
+    """
+    Defines and adds the required validation check columns for time series
+    validations outputs.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+    validations: list[str]
+        list of pre-defined validations to include in the output, as defined
+        within this function.
+    measures: list[str]
+        list of measures included in the output, which will determine which
+        breach parameter value to use.
+
+    Returns
+    -------
+    pandas.DataFrame
+
+    """
+    # Define list of valid validation measures
+    valid_list = ["YoY_change", "YoY_percent_change", "Avg_columns",
+                  "Avg_change", "Avg_percent_change", "YoY_breach",
+                  "Avg_breach"]
+
+    # Check for an invalid validation type in the input argument
+    for validation in validations:
+        helpers.validate_value_with_list("validations", validation,
+                                         valid_list)
+
+    # Apply any validations listed in the validations argument
+
+    validation = "YoY_change"
+    if validation in validations:
+        # Add Year on Year absolute change using years defined in parameters
+        df = helpers.add_column_difference(df, new_column_name=validation,
+                                           col1=None,  col2=None)
+
+    validation = "YoY_percent_change"
+    if validation in validations:
+        # Add Year on Year percent change using years defined in parameters
+        df = helpers.add_percent_change(df, validation, param.YOY_TO_YEAR,
+                                        param.YOY_FROM_YEAR, 100)
+
+    validation = "Avg_columns"
+    years = param.ROLLING_AVG_YEARS
+    if validation in validations:
+        # Add average across number of years, as defined in parameters
+        df = helpers.add_average_of_columns(df, param.YOY_TO_YEAR, years)
+
+    validation = "Avg_change"
+    if validation in validations:
+        # Add absolute change from current year to average across years field
+        df = helpers.add_column_difference(df, new_column_name=validation,
+                                           col1="Avg_columns", col2=param.YOY_TO_YEAR)
+
+    validation = "Avg_percent_change"
+    if validation in validations:
+        # Add percent change from current year to average across years field
+        df = helpers.add_percent_change(df, validation, param.YOY_TO_YEAR,
+                                        "Avg_columns", 100)
+
+    validation = "YoY_breach"
+    if validation in validations:
+        # Add a year on year breach warning based on the measure
+        if "Coverage" in measures:
+            breach = param.YOY_COV_BREACH_KC63
+            check_column = "YoY_change"
+            change_type = "absolute"
+        elif 'Rate_with_cancer' in measures:
+            breach = param.YOY_RATE_BREACH_KC62
+            check_column = "YoY_change"
+            change_type = "absolute"
+        elif ('Women_eligible' in measures) | ('Women_screened_less3yrs' in measures):
+            breach = param.YOY_BREACH_KC63
+            check_column = "YoY_percent_change"
+            change_type = "percentage"
+        elif ('Total_with_cancer' in measures) | ('Invited' in measures):
+            breach = param.YOY_BREACH_KC62
+            check_column = "YoY_percent_change"
+            change_type = "percentage"
+
+        df[validation] = np.where(df[check_column] > breach, "More than "
+                                  + str(breach) + change_type
+                                  + " difference compared to previous year",
+                                  "Pass")
+
+    validation = "Avg_breach"
+    if validation in validations:
+        # Add an average breach warning based on the measure
+        if "Coverage" in measures:
+            breach = param.AVG_COV_BREACH_KC63
+            check_column = "Avg_change"
+            change_type = "percentage point"
+        elif ('Rate_with_cancer' in measures):
+            breach = param.AVG_RATE_BREACH_KC62
+            check_column = "Avg_change"
+            change_type = "rate"
+        elif ('Women_eligible' in measures) | ('Women_screened_less3yrs' in measures):
+            breach = param.AVG_BREACH_KC63
+            check_column = "Avg_percent_change"
+            change_type = "percentage"
+        elif ('Total_with_cancer' in measures) | ('Invited' in measures):
+            breach = param.AVG_BREACH_KC62
+            check_column = "Avg_percent_change"
+            change_type = "percentage"
+
+        df[validation] = np.where(df[check_column] > breach, "More than "
+                                  + str(breach) + change_type
+                                  + " difference compared to previous year",
+                                  "Pass")
 
     return df

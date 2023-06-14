@@ -12,7 +12,7 @@ def get_project_root() -> Path:
     Return the project root path from any file in the project.
 
     Example:
-        from parent.utilities.helpers import get_project_root
+        from shmi_improvement.utilities.helpers import get_project_root
         root_path = get_project_root()
     """
     return Path(__file__).parent.parent.parent
@@ -39,6 +39,51 @@ def get_year_range(end_year: str, year_span: int):
     return year_range[::-1]
 
 
+def get_start_year_range(end_year: str, year_span: int):
+    """
+    Create list of financial start year strings, given an end year and a number
+    of years to go back
+
+    Example:
+        get_year_range('2021',2)
+        returns -> ['01APR2020','01APR2021']
+    """
+    year_range = []
+
+    for n_year in range(year_span):
+        year = "01APR" + (str(int(end_year[0:4])-(n_year)))
+        year_range.append(year)
+        n_year += 1
+
+    # List oldest year first
+    return year_range[::-1]
+
+
+def create_year_list(df, year_field):
+    """
+    Creates a list of years contained in a dataframe. This list can be used
+    within loops in functions used to create time series tables.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+    year_field : list[str]
+        Variable name that holds year data
+
+    Returns
+    -------
+    years : list
+        Returns a list of years, order by oldest first
+
+    """
+    # Creates a list of years in the dataframe to loop through, oldest year first
+    years = set(df[year_field].values)
+    years = list(years)
+    years.sort()
+
+    return years
+
+
 def new_column_from_lookup(df, from_column, lookup, new_column):
     """
     Add a new dataframe column by looking up values in a dictionary
@@ -47,16 +92,16 @@ def new_column_from_lookup(df, from_column, lookup, new_column):
     ----------
     df : pandas.DataFrame
     from_column: str
-        name of the column containing the original values
+        Name of the column containing the original values
     lookup: dict
-        contains the lookup from and to values
+        Contains the lookup from and to values
     new_column: str
-        name of the new column containing the values to added
+        Name of the new column containing the values to added
 
     Returns
     -------
     df : pandas.DataFrame
-        with added column
+        df with added column
     """
     # create the lookup dataframe from the lookup input
     df_lookup = pd.DataFrame(list(lookup.items()))
@@ -82,22 +127,22 @@ def new_column_from_check_list(df, check_column, check_content,
     ----------
     df : pandas.DataFrame
     check_column: str
-        name of the existing dataframe column containing the values to be
+        Name of the existing dataframe column containing the values to be
         checked.
     check_content: dict(str, list)
-        contains the new column name, and a list of values that will be
+        Contains the new column name, and a list of values that will be
         checked against.
     value_if_true:
-        value that will be applied if the check is True (value exists in the
+        Value that will be applied if the check is True (value exists in the
         ref data). Mmust match the format of 'value_if_false'.
     value_if_false:
-        value that will be applied if the check is False (value does not exist
+        Value that will be applied if the check is False (value does not exist
         in the ref data). Must match the format of 'value_if_true'.
 
     Returns
     -------
     df : pandas.DataFrame
-        with added column
+        df with added column
     """
     # Check the format of the values to be applied under the true and false
     # outcome of the check
@@ -106,7 +151,7 @@ def new_column_from_check_list(df, check_column, check_content,
 
     # Raise an error if these formats do not match
     if format_if_true != format_if_false:
-            raise ValueError("The value_if_true and value_if_false arguments are of different formats")
+        raise ValueError("The value_if_true and value_if_false arguments are of different formats")
 
     # For each new column name specified in the input dictionary, extract the
     # new column name and reference values within it to check against
@@ -139,7 +184,7 @@ def replace_col_value(df, col_names, replace_value):
     Returns
     -------
     df : pandas.DataFrame
-        With updated values for specified columns
+        df with updated values for specified columns
     """
 
     for col in col_names:
@@ -156,13 +201,13 @@ def remove_rows(df, remove_values):
     ----------
     df : pandas.DataFrame
     remove_values : list[str]
-        list of values based on which the rows will be removed if found
+        List of values based on which the rows will be removed if found
         in any df columns.
 
     Returns
     -------
     df : pandas.DataFrame
-        With rows removed
+        df with rows removed
     """
     for condition in remove_values:
         df = df[~df.eq(condition).any(axis=1)]
@@ -252,12 +297,12 @@ def excel_col_to_df_col(col, write_cell):
     col: str
         Excel column letter
     write_cell: str
-        cell that identifies start of where df will be written
+        Cell that identifies start of where df will be written
 
     Returns
     -------
     order of letter value: int
-        number indicating which position to insert new column into dataframe
+        Number indicating which position to insert new column into dataframe
     '''
     if len(col) == 1:
         return (ord(col[0])) - (ord(write_cell[0]))
@@ -350,8 +395,8 @@ def add_percent_or_rate(df, new_column_name, numerator,
     return df
 
 
-def add_column_difference(df,
-                          new_column_name="Difference"):
+def add_column_difference(df, new_column_name="Difference",
+                          col1=None,  col2=None):
     """
     Adds a difference column to a dataframe based on the last 2 columns.
 
@@ -360,13 +405,21 @@ def add_column_difference(df,
     df : pandas.DataFrame
     new_column_name: str
         Name of the new calculated column. Set by default to 'Difference'
+    col1, col2: str
+        Names of the two columns to be used in the difference calculation.
+        Default is none, if not supplied, the last 2 cols of the df will be used.
 
     Returns
     -------
     df : pandas.DataFrame
     """
-    # Select the last 2 columns in the dataframe
-    df_columns = df.iloc[:, -2:]
+    if col1 is None and col2 is None:
+        # Select the last 2 columns in the dataframe
+        df_columns = df.iloc[:, -2:]
+    elif col1 is None or col2 is None:
+        raise ValueError("Only one of col1 and col2 has been provided. Provide both or neither")
+    else:
+        df_columns = df[[col1, col2]]
 
     # Check that there are at least 2 columns to perform the calculation
     if len(df_columns.columns) < 2:
@@ -640,5 +693,117 @@ def filter_for_year(df, year, date_start_col='Date_start', date_end_col='Date_en
 
     # Drop date start and end columns
     df = df.drop([date_start_col, date_end_col], axis=1)
+
+    return df
+
+
+def start_date_to_year_series(df, old_date_field, new_date_field, yr_range):
+    '''
+    Takes a date field in the format DDMMYYYY (e.g. '01APR2021') and adds a year
+    range column to the dataframe (e.g '2021-22')
+
+    Parameters
+    ----------
+    df : pandas.Dataframe
+    old_date_field : str
+        Must be in the format DDMMYYYY (e.g. '01APR2021')
+    new_date_field : str
+        New column name that will be added to the dataframe in the format YYYY-YY
+    yr_range: int
+        The number of years to add to the start year
+
+    Returns
+    -------
+    df : pandas.Dataframe
+        With new year range column appended
+
+    '''
+    # Take last 4 characters from original date field to create a start year and
+    # set to numeric to create an end year
+    df["Start_year"] = df[old_date_field].str[-4:].astype(int)
+    # Add one year to the start year to create an end year
+    df["End_year"] = df["Start_year"] + yr_range
+    # Set the start and end year fields to string to enable concatenation
+    df[["Start_year", "End_year"]] = df[["Start_year", "End_year"]].astype(str)
+    # Create new date field in format of '2021-22'
+    df[new_date_field] = df["Start_year"] + "-" + df["End_year"].str[-2:]
+    # Drop start and end dates as these are no longer required
+    columns = ["Start_year", "End_year"]
+    df = df.drop(columns, axis=1)
+
+    return df
+
+
+def add_average_of_columns(df, end_column, number_cols,
+                           new_column_name="Avg_columns"):
+    """
+    Adds an average value to a dataframe based on a specified subset of columns
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+    end_column: str
+        The name of the final year column used to define the subset of data the average
+        will be calculated from (e.g "2021-22")
+    number_cols: int
+        The number of columns to be used to calculate the average (e.g to calculate
+        a 3 year average, number_cols will equal 3)
+    new_column_name: str
+            Name of the new calculated column.
+
+    Returns
+    -------
+    df : pandas.DataFrame
+    """
+
+    # Create list of column names to be used when calculating mean
+    column_list = get_year_range(end_column, number_cols)
+
+    # Use column name list to create a subset of the dataframe from which the mean
+    # will be calculated from
+    df_columns = df[column_list]
+
+    for column in df_columns:
+        if df[column].dtypes not in ["integer", "float"]:
+            raise ValueError(f"add_average_of_columns function is being performed on column ({column}) that contains non-numeric values")
+
+    # Calculate the mean for the subset of columns
+    average_columns = df_columns.mean(axis=1)
+    # Append mean as a field to the original full dataframe
+    df[new_column_name] = average_columns
+
+    return df
+
+
+def add_percent_change(df, new_column_name, to_year, from_year, multiplier=1):
+    """
+    Adds a percent change or rate to a dataframe based on specified column inputs.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+    new_column_name: str
+        Name of the new calculated column.
+    to_year: str
+        Name of dataframe column that contains values for the date the percentage
+        change will be calculated to
+    from_year: str
+        Name of dataframe column that contains values for the date the percentage
+        change will be calculated from
+    multiplier: int
+        Value by which the calculated field will be multiplied by e.g. set to
+        100 for percents. If no multiplier is needed then the parameter should
+        be excluded or set to 1.
+
+    Returns
+    -------
+    df : pandas.DataFrame
+    """
+    if to_year not in df:
+        raise ValueError(f"The column {to_year} is needed to create {new_column_name} but is not in the dataframe")
+    if from_year not in df:
+        raise ValueError(f"The column {from_year} is needed to create {new_column_name} but is not in the dataframe")
+
+    df[new_column_name] = ((((df[to_year]-df[from_year])/df[from_year]) * multiplier))
 
     return df

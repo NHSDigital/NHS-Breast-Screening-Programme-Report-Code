@@ -1,6 +1,3 @@
-"""
-Purpose of script: contains the core business logic
-"""
 import pandas as pd
 import numpy as np
 import logging
@@ -11,93 +8,6 @@ from functools import reduce
 
 
 logger = logging.getLogger(__name__)
-
-
-def combine_small_las(df, lookup):
-    """
-    Combines small LAs to neighbouring LAs for non-
-    disclosive purposes, using a dictionary of old to new org codes and names
-    from the paramaters file.
-    As they sit in the same region, the parent details do not require updating.
-    Replace function uses regex which allows for non direct matching, in this
-    case applying the non-case sensitive option.
-
-    Parameters
-    ----------
-    df : pandas.DataFrame that includes an org code as a variable
-    lookup: dict(str, list)
-        Dictionary containing the original org code, and the org code and name
-        to replace.
-
-    Returns
-    -------
-    df : pandas.DataFrame
-        with the org codes and names updated as per the values in the
-        input dictionary.
-    """
-    # Create a dataframe from the reference data input
-    df_org_update = pd.DataFrame(data=lookup)
-    # Add case insensitive prefix used by regex. This ensures that when
-    # applying the replace function using regex, it will not be case sensitive
-    df_org_update["Org_Name"] = "(?i)" + df_org_update["Org_Name"]
-    df_org_update["Org_ONSCode"] = "(?i)" + df_org_update["Org_ONSCode"]
-
-    # Create separate dictionaries for the org code and org name lookups
-    df_code_update = dict(zip(df_org_update["Org_ONSCode"],
-                              df_org_update["Org_ONSCode_New"]))
-    df_name_update = dict(zip(df_org_update["Org_Name"],
-                              df_org_update["Org_Name_New"]))
-
-    # Use the dictionaries to update the codes and names in the input dataframe
-    df.replace({"Org_ONSCode": df_code_update}, inplace=True, regex=True)
-    df.replace({"Org_Name": df_name_update}, inplace=True, regex=True)
-
-    return df
-
-
-def update_la_regions(df, df_la_updates, year_range):
-    """
-    Will make regional updates to LAs based on the year,
-    using information from an imported dataframe.
-
-    Parameters
-    ----------
-    df : pandas.DataFrame
-    df_la_updates : pandas.DataFrame
-        Imported dataframe containing updates to be made to LAs
-    year_range : list['str']
-        List of years to be checked for changes to be applied against
-
-    Returns
-    -------
-    df : pandas.DataFrame
-
-    """
-
-    for year in year_range:
-        # Filter to find updates relevant to the current year
-        df_filt = helpers.filter_for_year(df_la_updates, year,
-                                          "BUSINESS_START_DATE",
-                                          "BUSINESS_END_DATE")
-
-        if df_filt.empty:
-            pass
-        else:
-            for row in range(len(df_filt)):
-                # Obtain the relevant LA_ONS_Code for each row in the dataframe,
-                # and update rows which match the current year and LA_ONS_Code with
-                # data from the filtered update dataframe
-                selection = df_filt.iloc[row]
-                la = selection["LA_ONS_Code"]
-
-                df.loc[(df["CollectionYearRange"] == year) & (df["Org_ONSCode"] == la),
-                       ["Parent_Org_Name",
-                        "Parent_Org_Code",
-                        "Parent_OrgONSCode"]] = [df_filt["REP_Parent_Name"].iloc[row],
-                                                 df_filt["REP_Parent_Code"].iloc[row],
-                                                 df_filt["REP_Parent_ONS_Code"].iloc[row]]
-
-    return df
 
 
 def transpose_for_dashboard(df, name):
@@ -118,7 +28,7 @@ def transpose_for_dashboard(df, name):
     Returns
     -------
     df : pandas.DataFrame
-        with the regional and national measures now joined to local data rather
+        df with the regional and national measures now joined to local data rather
         than appended.
     """
     # Set the columns which will be used when selecting and joining the
@@ -203,31 +113,6 @@ def filter_dataframe(df, part, table_code, filter_condition, ts_years, year=para
     return df
 
 
-def create_year_list(df, year_field):
-    """
-    Creates a list of years contained in a dataframe. This list can be used
-    within loops in functions used to create time series tables.
-
-    Parameters
-    ----------
-    df : pandas.DataFrame
-    year_field : list[str]
-        Variable name that holds year data
-
-    Returns
-    -------
-    years : list
-        Returns a list of years, order by oldest first
-
-    """
-    # Creates a list of years in the dataframe to loop through, oldest year first
-    years = set(df[year_field].values)
-    years = list(years)
-    years.sort()
-
-    return years
-
-
 def sort_for_output_defined(df, rows, row_order):
     """
     Sorts the dataframe in the user defined order required for the output.
@@ -262,7 +147,7 @@ def sort_for_output_defined(df, rows, row_order):
     return df
 
 
-def sort_for_output(df, sort_on, cols_to_remove):
+def sort_for_output(df, sort_on, cols_to_remove=[]):
     """
     Sorts the dataframe on specified columns required for the output.
     Drops columns only used for sorting.
@@ -404,16 +289,16 @@ def create_output_crosstab(df, rows, columns, part, table_code,
         Variable name that holds the collection table code (letter).
         Accepts None (no filter applied) or a list of one or more.
     sort_on: list[str]
-        list of columns names to sort on (ascending).
+        List of columns names to sort on (ascending).
         Can include columns that will not be displayed in the output.
         Function will use either this OR row_order for sorting.
     row_order: list[str]
-        list of row content that determines the order data will be presented
+        List of row content that determines the order data will be presented
         in the output. Allows for full control of row ordering (can only include
         row values that exist in the collection). Function will use either this
         OR sort_on for sorting.
     column_order: list[str]
-        list of column descriptions that determines the order they will be
+        List of column descriptions that determines the order they will be
         presented in the output.
         If set to None then the total of each year will be applied.
     column_rename : dict
@@ -464,7 +349,7 @@ def create_output_crosstab(df, rows, columns, part, table_code,
                                    ts_years)
 
     # Create list of years to use in loop
-    years = create_year_list(df_filtered, 'CollectionYearRange')
+    years = helpers.create_year_list(df_filtered, 'CollectionYearRange')
 
     # Rename the original rows input (those to be included in output) for later
     # use in selecting index
@@ -609,16 +494,16 @@ def create_output_measure(df, measure_column, measure,
         Variable name that holds the collection table code (letter).
         Accepts None (no filter applied) or a list of one or more.
     sort_on: list[str]
-        list of columns names to sort on (ascending).
+        List of columns names to sort on (ascending).
         Can include columns that will not be displayed in the output.
         Function will use either this OR row_order for sorting.
     row_order: list[str]
-        list of row content that determines the order data will be presented
+        List of row content that determines the order data will be presented
         in the output. Allows for full control of row ordering (can only include
         row values that exist in the collection). Function will use either this
         OR sort_on for sorting.
     column_order: list[str]
-        list of column descriptions that determines the order they will be
+        List of column descriptions that determines the order they will be
         presented in the output.
         If set to None then the total of each year will be applied.
     column_rename : dict
@@ -631,7 +516,7 @@ def create_output_measure(df, measure_column, measure,
     subgroup: dict(dict(str, list))
         Optional input where a grouped option is reported, requiring a new
         subgroup based on row content.
-        Contains the target column name, and for each target column another
+        Contain the target column name, and for each target column another
         nested dictionary with new subgroup code that will be assigned to the new
         grouping(s), and the original subgroup values that will form the group.
     include_row_labels: bol
@@ -758,9 +643,9 @@ def create_output_csv_tidy(df, collection, org_level, breakdown,
     table_code : list[str]
         Variable name that holds the collection table code (letter).
     sort_on : list[str]
-        list of columns names to sort on (ascending).
+        List of columns names to sort on (ascending).
     measure_order: list[str]
-        list of measure names from the measure_column that determines what is
+        List of measure names from the measure_column that determines what is
         included and the order they will be presented in the output.
     column_rename : dict
         Optional dictionary for renaming of columns from the data source version
@@ -841,11 +726,12 @@ def create_output_csv_tidy(df, collection, org_level, breakdown,
     # If SDR is part of output then create the expected invasive cancers
     # required to calculate SDR and add them to the dataframe
     if 'SDR' in measure_order:
+        # Set up empty list
         total_dfs = []
-        
+
         # Get distinct list of years from data
         years = list(df_updates["CollectionYearRange"].unique())
-        
+
         for year in years:
             # Filter dataframe for each year
             df_sdr = df_updates[df_updates["CollectionYearRange"] == year]
@@ -855,7 +741,7 @@ def create_output_csv_tidy(df, collection, org_level, breakdown,
             total_dfs.append(df_sdr)
 
         # Concatenate data for all years
-        df_updates = pd.concat(total_dfs).reset_index()        
+        df_updates = pd.concat(total_dfs).reset_index()
 
     # Pivots the dataframe so the measure_column content is set as columm headers
     df_agg = pd.pivot_table(df_updates,
@@ -900,6 +786,201 @@ def create_output_csv_tidy(df, collection, org_level, breakdown,
     df_sorted = df_sorted.fillna(not_applicable)
 
     return df_sorted
+
+
+def create_output_ts_validations(df, rows, measures, part, table_code, sort_on,
+                                 filter_condition, row_subgroup, validations,
+                                 ts_years, measure_column="Col_Def",
+                                 ts_column="CollectionYearRange"):
+    """
+    Will create a crosstab output with time series set as columns, and measures
+    in rows, plus any additonal required breakdowns. Can be set for any number
+    of years and existing measures.
+    Validation check columns are added as defined by user input.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+    rows : list[str]
+        Variable name(s) that holds the row labels (e.g. org names, age breakdowns)
+        that are to be included in the output. Multiple variables can be used.
+    measures : list[str]
+        Name of measure(s) to be returned. Must be an existing value from the
+        measure_column, can not be a rate/percentage calculated field
+        from field_definitions.
+    part : list[str]
+        Variable name that holds the collection part.
+    table_code : list[str]
+        Variable name that holds the collection table code (letter).
+    sort_on : list[str]
+        List of columns names to sort on (ascending).
+    filter_condition : str
+        This is a non-standard, optional dataframe filter as a string.
+    row_subgroup: dict(dict(str, list))
+        Optional input where a grouped option is reported, requiring a new
+        subgroup based on row content.
+        Contains the target column name, and for each target column another
+        nested dictionary with new subgroup code that will be assigned to the new
+        grouping(s), and the original subgroup values that will form the group.
+    validations: list[str]
+        List of pre-defined validations to include in the output. Must
+        exist in processing_steps.add_validation_columns
+    ts_years: int
+        Number of years to be shown in the time series.
+    measure_column: str
+        Single column name that holds the measure information (e.g. Col_Def)
+    ts_column: str
+        Single column name that holds the years for the time series.
+
+    Returns
+    -------
+    df: pandas.DataFrame
+
+    """
+    # Standardardise letter casing to upper case for all LA names within KC63 data
+    if ('Women_eligible' in measures) | ('Women_screened_less3yrs' in measures):
+        df["Org_Name"] = df["Org_Name"].str.upper()
+
+    # Filter data to years required for timeseries
+    df_filtered = filter_dataframe(df, part, table_code, filter_condition,
+                                   ts_years)
+
+    # Filter data to measures to output
+    df_filtered = df_filtered[df_filtered[measure_column].isin(measures)]
+
+    # Pivot dataframe so that the years in the time series are presented as columns
+    df_agg = pd.pivot_table(df_filtered,
+                            values="Value",
+                            index=rows,
+                            columns=ts_column,
+                            aggfunc="sum").reset_index()
+
+    # Add any required row subgroups to the dataframe
+    if row_subgroup is not None:
+        df_agg = helpers.add_subgroup_rows(df_agg, rows, row_subgroup)
+
+    # Sort rows in dataframe by order defined in sort_on
+    if sort_on is not None:
+        df_agg = df_agg.sort_values(by=sort_on, ascending=True)
+
+    # Add required validation columns
+    df_validations = definitions.add_validation_columns(df_agg,
+                                                        validations, measures)
+
+    # Set index ready for writing to Excel
+    df_validations.set_index(rows, inplace=True)
+
+    return df_validations
+
+
+def create_output_ts_validations_measure(df, rows, measure, part, table_code,
+                                         sort_on, filter_condition, subgroup,
+                                         validations, ts_years,
+                                         measure_column="Col_Def",
+                                         ts_column="CollectionYearRange"):
+    """
+    A variation on the create_output_ts_validation function that is used for
+    outputs where the entire crosstab contains a single measure calculated from
+    2 existing measures (e.g. coverage).
+    The output can be created for any number of years.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+    rows : list[str]
+        Variable name(s) that holds the row labels (e.g. regions) that are
+        to be included in the output.
+    measure : str
+        Name of single measure to be returned. Must be a value from the
+        measure_column or a calculated field from field_definitions.
+    part : list[str]
+        Variable name that holds the collection part.
+        Accepts None (no filter applied) or a list of one or more.
+    table_code : list[str]
+        Variable name that holds the collection table code (letter).
+        Accepts None (no filter applied) or a list of one or more.
+    sort_on: list[str]
+        Optional list of columns to sort on (ascending).
+    filter_condition : str
+        This is a non-standard, optional dataframe filter as a string
+        needed for some tables. It may consist of one or more filters of the
+        dataframe variables.
+    subgroup: dict(dict(str, list))
+        Optional input where a grouped option is reported, requiring a new
+        subgroup based on row content.
+        Contain the target column name, and for each target column another
+        nested dictionary with new subgroup code that will be assigned to the new
+        grouping(s), and the original subgroup values that will form the group.
+    validations: list[str]
+        list of pre-defined validations to include in the output. Must
+        exist in processing_steps.add_validation_columns
+    ts_years: int
+        Number of years to be shown in the time series.
+    measure_column: str
+        Single column name that holds the measure information (e.g. Col_Def)
+    ts_column: str
+        Single column name that holds the years for the time series.
+
+    Returns
+    -------
+    df : pandas.DataFrame
+        in the form of a crosstab, with aggregated counts
+    """
+    # Standardardise letter casing to upper case for all LA names within KC63 data
+    if ('Coverage' in measure):
+        df["Org_Name"] = df["Org_Name"].str.upper()
+
+    # Filter data to years required for timeseries
+    df_filtered = filter_dataframe(df, part, table_code, filter_condition,
+                                   ts_years)
+
+    rows_columns = [*rows, ts_column]
+
+    # Pivot and aggregate the data with measure_column content set as columns.
+    df_agg = pd.pivot_table(df_filtered,
+                            values="Value",
+                            index=rows_columns,
+                            columns=measure_column,
+                            aggfunc="sum").reset_index()
+
+    # Add the subtotals for each column
+    df_agg = helpers.add_subtotals(df_agg, rows_columns)
+
+    # Add any required row subgroups to the dataframe
+    if subgroup is not None:
+        df_agg = helpers.add_subgroup_rows(df_agg, rows_columns, subgroup)
+
+    # If required add the measure from field_definitions file
+    df_agg = definitions.add_measures(df_agg, [measure])
+
+    # Retain only the specified measure from the measure column
+    cols_to_retain = [*rows_columns, measure]
+    df_agg = df_agg[cols_to_retain]
+
+    # Now that non-measure counts have been removed, pivot the variable
+    # containing the required column information into the column headers.
+    df_measure = pd.pivot_table(df_agg,
+                                values=measure,
+                                index=rows,
+                                columns=ts_column).reset_index()
+
+    # Drop the grand_total of year column
+    df_measure = df_measure.drop(["Grand_total"], axis=1)
+
+    # Add required validation columns, first adding single measure to a list
+    # as required for validations function
+    measures = [measure]
+    df_validations = definitions.add_validation_columns(df_measure,
+                                                        validations, measures)
+
+    # Apply final row order
+    if sort_on is not None:
+        df_validations = sort_for_output(df_measure, sort_on)
+
+    # Set index ready for writing to Excel
+    df_validations.set_index(rows, inplace=True)
+
+    return df_validations
 
 
 def output_specific_updates(df, name):

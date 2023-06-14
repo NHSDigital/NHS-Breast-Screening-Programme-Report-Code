@@ -18,13 +18,15 @@ def import_asset_data(collection, year_range: list = [param.YEAR]):
         The collection reference (KC62 or KC63)
     year_range: list
         The list of years to return
-        defaults to returning YEAR from parameters.py
+        Defaults to returning YEAR from parameters.py
 
     Returns
     -------
     pandas.DataFrame
 
     """
+    logging.info("Importing organisation reference data from the SQL database")
+
     # Load our parameters
     server = param.SERVER
     database = param.DATABASE
@@ -45,7 +47,7 @@ def import_asset_data(collection, year_range: list = [param.YEAR]):
     df = dbc.df_from_sql(data, server, database)
 
     # If KC63 data for 2012-13 is included, then the LA level data for that
-    # year has to be removed (pubished data for that year was based on PCTs but
+    # year has to be removed (published data for that year was based on PCTs but
     # the asset has data for both org types)
     if (collection == "KC63") & ("2012-13" in year_range):
         df = drop_la_data_201213(df)
@@ -86,6 +88,8 @@ def import_la_update_info():
     pandas.DataFrame
 
     """
+    logging.info("Importing LA reference data from external file")
+
     # Import excel file
     ref_file = param.LA_UPDATES
     df = pd.read_csv(ref_file, index_col=None,

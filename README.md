@@ -75,6 +75,11 @@ breast-screening-rap
 
 # Running the main process
 
+Note: This process is run internally by NHS England using restricted access datasets and servers. Therefore, it is not possible to run the published code externally without access to the equivalent dataset. 
+
+References to internal servers and other private information have been removed from the project code. The published code includes all the calculations and transformations applied to the underlying data during the production of the report.
+
+
 There are two main files that users running the process will need to interact with:
 
 - [parameters.py](bs_code/parameters.py)
